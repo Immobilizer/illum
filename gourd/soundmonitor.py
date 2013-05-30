@@ -5,35 +5,62 @@ import socket
 
 SERVER = 'localhost'
 SERVER_PORT = 8090
-HOT = 'false'
 
- 
+HOT = 'false'                   #]
+NOISYCOUNT = 0                  #]
+AVG = 100000                    #]---- Variables for noise detector...
+FAST_AVG = []                   #]
+VOLUMES = []                    #]
+FAST_VOLUMES = []               #]
+
 def readAudioData(in_data, frame_count, time_info, status):
+
 	global HOT
+	global NOISYCOUNT
+	global AVG
+	global FAST_AVG
+	global VOLUMES
+	global FAST_VOLUMES
+
+	# adjust these values to fine tune sound detection
+	blockThreshold = 4 # if we get this many loud blocks in a row, sound is important
+	floorFactor = 1.35 # volumes proportional to this number and under are considered the noise floor
+
 	level = audioop.rms(in_data, 2)
 	report = False
 	isHot = 'false'
 
-	print(level)
+	print("fast average: ", FAST_AVG," average: ", AVG)
 
-	#write a test to determine if the mic hears sound
-	if level >= 1500:
-		isHot = 'true'
+	FAST_VOLUMES.insert(0, level) # add level and compute a moving average for current volume
+	del FAST_VOLUMES[3:]
+	FAST_AVG = sum(FAST_VOLUMES) / len(FAST_VOLUMES)
 
-	#write a test to determine if the system should call in
-	if HOT != isHot:
+	if FAST_AVG < AVG * floorFactor: # if its quiet...
+		NOISYCOUNT = 0
+
+		VOLUMES.insert(0, level) # add level and compute a moving average for noise floor
+		del VOLUMES[500:]        # if current volume is loud enough, it is not part of noise floor
+		AVG = sum(VOLUMES) / len(VOLUMES)
+
+	else: # if its loud enough...
+		NOISYCOUNT += 1
+
+		if NOISYCOUNT >= blockThreshold: # write a test to determine if the mic hears legitimate sound
+			isHot = 'true'
+			print ("hot, NOISYCOUNT: ", NOISYCOUNT)
+
+	if HOT != isHot: # write a test to determine if the system should call in
 		HOT = isHot;
 		report = True
 
-	if report:
+	if report: # call node server with sockets
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((SERVER, SERVER_PORT))
 		s.sendall('{"listening":true, "hot":' +  isHot + '}')
 		s.close()
 
 	return (in_data, pyaudio.paContinue)
-	
-	
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -53,9 +80,8 @@ stream.start_stream();
 
 print("* recording")
 
-
 while stream.is_active():
-	time.sleep(0.1)
+    time.sleep(0.1)
     #frames.append(data)
 
 print("* done recording")
