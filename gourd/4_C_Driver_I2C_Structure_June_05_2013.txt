@@ -1,0 +1,10 @@
+gsCommunication.EIset = ISET_Manual;					/*0 I2C Ready: Current Setting Mode [No mode selected = ISET_ZERO, Standby mode = ISET_STANDBY, Temperature compensation = ISET_Temp,  Manual = ISET_Manual, Direct DAC Control = ISET_Dac, Flyback direct drive control = ISET_IFB]*/
+gsCommunication.EColorTemp = COLOR_4000K;				/*1 I2C Ready: Color Temperature Options [No selected color = COLOR_ZERO, 3000K = COLOR_3000K, 3500K = COLOR_3500K, 4000K = COLOR_4000K, 4500K = COLOR_4500K]*/
+gsCommunication.u16CurrentOutC1 = U16_INITIAL_CURRENT_C1;		/*2 3 I2C Ready: Channel 1 outptut current register, initialized @ startup*/
+gsCommunication.u16CurrentOutC2 = U16_INITIAL_CURRENT_C2;		/*4 5 I2C Ready: Channel 2 outptut current register, initialized @ startup*/
+gsCommunication.u16CurrentOutC3 = U16_INITIAL_CURRENT_C3;		/*6 7 I2C Ready: Channel 3 outptut current register, initialized @ startup*/
+gsCommunication.u16CurrentOutC4 = U16_INITIAL_CURRENT_C4;		/*8 9 I2C Ready: Channel 4 outptut current register, initialized @ startup*/
+gsCommunication.ECurrentControl = ICONTROL_Pwm;				/*10 I2C Ready: Current Control Scheme [PWM = ICONTROl_Pwm, Linear = ICONTROL_Linear]*/
+gsCommunication.EDimmingMode = DIMMING_ZeroTen;				/*11 Dimming option [0-10V = DIMMING_ZeroTen, DALI = DIMMING_Dali]*/											/*27 Register to control red DAC for Current_Set_Mode*/
+gsCommunication.u8Temperature = 0;					/*12 NON-FUNCTIONAL, TEMP SET TO ZERO*/
+gsCommunication.u8SoftStartFlag = true;					/*13 Soft start flag set to true @ startup*/
