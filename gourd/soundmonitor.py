@@ -2,16 +2,17 @@ import pyaudio
 import audioop
 import time
 import socket
+import math
 
 SERVER = 'localhost'
 SERVER_PORT = 8090
+HOT = 'false'
 
-HOT = 'false'                   #]
-NOISYCOUNT = 0                  #]
-AVG = 100000                    #]---- Variables for noise detector...
-FAST_AVG = []                   #]
-VOLUMES = []                    #]
-FAST_VOLUMES = []               #]
+NOISYCOUNT = 0                                         #]
+AVG = 100000.0                                           #]---- Variables for noise detector...
+FAST_AVG = []                                          #]
+VOLUMES = []                                           #]
+FAST_VOLUMES = []                                      #]
 
 def readAudioData(in_data, frame_count, time_info, status):
 
@@ -24,13 +25,13 @@ def readAudioData(in_data, frame_count, time_info, status):
 
 	# adjust these values to fine tune sound detection
 	blockThreshold = 4 # if we get this many loud blocks in a row, sound is important
-	floorFactor = 1.35 # volumes proportional to this number and under are considered the noise floor
+	floorFactor = math.fabs((AVG - 4036.)/(-1454)) # volumes proportional to this number and under are considered the noise floor
 
 	level = audioop.rms(in_data, 2)
 	report = False
 	isHot = 'false'
 
-	print("fast average: ", FAST_AVG," average: ", AVG)
+	print("fast average: ", FAST_AVG," average: ", AVG, "floor Factor: ", floorFactor)
 
 	FAST_VOLUMES.insert(0, level) # add level and compute a moving average for current volume
 	del FAST_VOLUMES[3:]

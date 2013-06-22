@@ -1,0 +1,17 @@
+// JSON Structure
+
+var gourds =
+[
+	{"address":"number",
+	"listening":"boolean",
+	"hot":"boolean",
+	"colorTemp":"number",
+	"dimming":"number"}
+]
+
+//Command Structure
+//Web client:
+{command:"get_status"}
+{command:"open_stream", data:{gourds[key]}}
+{command:"set_colorTemp", data:{gourds[key], colorTemp:number}}
+{command:"set_dimming", data:{gourds[key], dimming:number}}
