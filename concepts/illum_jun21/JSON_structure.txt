@@ -12,6 +12,6 @@ var gourds =
 //Command Structure
 //Web client:
 {command:"get_status"}
-{command:"open_stream", data:{gourds[key]}}
-{command:"set_colorTemp", data:{gourds[key], colorTemp:number}}
-{command:"set_dimming", data:{gourds[key], dimming:number}}
+{command:"open_stream", "data":{"address":string}}
+{command:"set_colorTemp", "data":{"address":string, "colorTemp":number}}
+{command:"set_dimming", "data":{"address":string, "dimming":number}}
