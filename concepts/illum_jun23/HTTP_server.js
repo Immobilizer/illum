@@ -59,5 +59,5 @@ wsock.sockets.on('connection', function (socket) {
 		return;
 	});
 
-	socket.emit("httpServer", "Initial Data");
+	//socket.emit("httpServer", "Initial Data");
 });
