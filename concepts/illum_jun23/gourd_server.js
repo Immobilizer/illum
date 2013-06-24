@@ -19,16 +19,21 @@ tcpServer.on('connection', function(sock) {
 	sock.write("TCP sending message: Thanks for the connection, browser.");
 	console.log('Server listening on ' + tcpServer.address().address + ':' + tcpServer.address().port);
 
+	// Give HTTP server audio update data
+	function sendEvent(audioUpdate) {
+		sock.write(audioUpdate);
+	}
+
 	// Look for an existing record tied to the lamp's IP address
 	var gInfo = GOURDS.filter(function (el) {
-		return (el.address == socket.remoteAddress);
+		return (el.address == sock.remoteAddress);
 	})[0];
 
 	// Create an array object if one does not exist
 	if (!gInfo) {
 		// These are default values -- we'll update them later
 		gInfo =
-			{address:socket.remoteAddress,
+			{address:sock.remoteAddress,
 			listening:false,
 			hot:false,
 			colorTemp:3000,
@@ -112,6 +117,7 @@ server.on('connection', function(socket) {
 			gInfo.hot = smData.hot};
 		// Send sound control status to HTTP server
 		// sock.write(JSON.stringify(GOURDS));
+		sendEvent(JSON.stringify(GOURDS));
 	});
 });
 
