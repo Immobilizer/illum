@@ -21,7 +21,8 @@ tcpServer.on('connection', function(sock) {
 	sock.on('data', function(data) {
 		console.log('got data ' + data);
 		var browserData = JSON.parse(data);
-		console.log(browserData);
+
+		// New socket to connect to gourd lighting control
 		var socket = new net.Socket();
 		// Perform the correct action depending on the command.
 		if (browserData.command == "get_status") {
@@ -33,9 +34,11 @@ tcpServer.on('connection', function(sock) {
 		} else if (browserData.command == "set_colorTemp") {
 			socket.connect(lc_PORT, browserData.parameters.address);
 			socket.write('{"colorTemp":' + browserData.parameters.colorTemp + '}');
+			socket.end();
 		} else if (browserData.command == "set_dimming") {
 			socket.connect(lc_PORT, browserData.parameters.address);
 			socket.write('{"dimming":' + browserData.parameters.dimming + '}');
+			socket.end();
 		}
 	});
 });
