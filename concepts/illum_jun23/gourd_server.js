@@ -1,5 +1,17 @@
 // @type {Array.<{address:string, listening:boolean, hot:boolean, colorTemp:number, dimming:number}>}
+//var GOURDS = [];
+var MyArray = function() {
+	var arr = [];
+	arr.push = function() {
+		console.log("PUSHING", arguments);
+		return Array.prototype.push.apply(this, arguments);
+	}
+	return arr;
+};
+
+//var GOURDS = new MyArray;
 var GOURDS = [];
+
 /*	
  *	TCP server for socket communication w/ HTTP server.
  *	HTTP server sends data, TCP server routes data to gourd.
@@ -19,30 +31,6 @@ tcpServer.on('connection', function(sock) {
 	sock.write("TCP sending message: Thanks for the connection, browser.");
 	console.log('Server listening on ' + tcpServer.address().address + ':' + tcpServer.address().port);
 
-	// Give HTTP server audio update data
-	function sendEvent(audioUpdate) {
-		sock.write(audioUpdate);
-	}
-
-	// Look for an existing record tied to the lamp's IP address
-	var gInfo = GOURDS.filter(function (el) {
-		return (el.address == sock.remoteAddress);
-	})[0];
-
-	// Create an array object if one does not exist
-	if (!gInfo) {
-		// These are default values -- we'll update them later
-		gInfo =
-			{address:sock.remoteAddress,
-			listening:false,
-			hot:false,
-			colorTemp:3000,
-			dimming:100}
-		//Collecting all the clients
-		GOURDS.push(gInfo);
-		console.log('new monitor: ' + socket.remoteAddress);
-	}
-
 	// Routes data from HTTP server to gourd lighting control.
 	sock.on('data', function(data) {
 		console.log('got data ' + data);
@@ -61,14 +49,12 @@ tcpServer.on('connection', function(sock) {
 			lc_Socket.connect(lc_PORT, browserData.parameters.address);
 			lc_Socket.write('{"colorTemp":' + browserData.parameters.colorTemp + '}');
 			// Update gourd status
-			if (browserData.hasOwnProperty("colorTemp")) {
-				gInfo.colorTemp = browserData.colorTemp};
+			gInfo.colorTemp = browserData.parameters.colorTemp;
 		} else if (browserData.command == "set_dimming") {
 			lc_Socket.connect(lc_PORT, browserData.parameters.address);
 			lc_Socket.write('{"dimming":' + browserData.parameters.dimming + '}');
 			// Update gourd status
-			if (browserData.hasOwnProperty("dimming")) {
-				gInfo.dimming = browserData.dimming};
+			gInfo.dimming = browserData.parameters.dimming;
 		}
 	});
 });
@@ -102,7 +88,7 @@ server.on('connection', function(socket) {
 			dimming:100}
 		//Collecting all the clients
 		GOURDS.push(gInfo);
-		console.log('new monitor: ' + socket.remoteAddress);
+		console.log('new monitor: ' + socket.remoteAddress);	
 	}
 
 	// Read data from a connection
@@ -115,9 +101,6 @@ server.on('connection', function(socket) {
 			gInfo.listening = smData.listening};
 		if (smData.hasOwnProperty("hot")) {
 			gInfo.hot = smData.hot};
-		// Send sound control status to HTTP server
-		// sock.write(JSON.stringify(GOURDS));
-		sendEvent(JSON.stringify(GOURDS));
 	});
 });
 
