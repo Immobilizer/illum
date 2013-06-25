@@ -1,113 +1,129 @@
-// @type {Array.<{address:string, listening:boolean, hot:boolean, colorTemp:number, dimming:number}>}
-//var GOURDS = [];
-var MyArray = function() {
-	var arr = [];
-	arr.push = function() {
-		console.log("PUSHING", arguments);
-		return Array.prototype.push.apply(this, arguments);
-	}
-	return arr;
-};
-
-//var GOURDS = new MyArray;
+/*	@type {Array.<{address:string, listening:boolean, hot:boolean, colorTemp:number, dimming:number}>}
+ *	Stores all information about every networked lamp. */
 var GOURDS = [];
 
-/*	
- *	TCP server for socket communication w/ HTTP server.
- *	HTTP server sends data, TCP server routes data to gourd.
- *	TCP server receives data from gourd and routes to HTTP server.
- */
-var tcp_PORT = 4040;			// Port for HTTP server communication
-var tcp_HOST = 'localhost';
-var lc_PORT = 50007;			// Port for gourd lighting control
+/*	For accessing socket outised socket.on('connection') closure.
+ *	After somebody is connected, foo.write(); can be called. */
+ var foo;
+
+/*	mServer = TCP server for socket communication with sound analysis program.
+ *	mServer populates GOURDS. */
+var mPort = 8090;
+var mHost = 'localhost';
 
 var net = require('net');
-var tcpServer = net.createServer();
-tcpServer.listen(tcp_PORT, tcp_HOST);
+var mServer = net.createServer();
+mServer.listen(mPort, mHost);
 
-// Listening for connection by HTTP server
-tcpServer.on('connection', function(sock) {
-	console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
-	sock.write("TCP sending message: Thanks for the connection, browser.");
-	console.log('Server listening on ' + tcpServer.address().address + ':' + tcpServer.address().port);
+mServer.on('connection', function(socket) {
+	console.log('mServer CONNECTED: ' + socket.remoteAddress + ':' + socket.remotePort);
 
-	// Routes data from HTTP server to gourd lighting control.
-	sock.on('data', function(data) {
-		console.log('got data ' + data);
-		var browserData = JSON.parse(data);
-
-		// New socket to connect to gourd lighting control
-		var lc_Socket = new net.Socket();
-		// Perform the correct action depending on the command.
-		if (browserData.command == "get_status") {
-			var status = JSON.stringify(GOURDS);
-			// Sends GOURDS right back to HTTP server
-			sock.write(status);
-		} else if (browserData.command == "open_stream") {
-			// Server doesn't have to do anything here -- gourd broadcasts on port 8000
-		} else if (browserData.command == "set_colorTemp") {
-			lc_Socket.connect(lc_PORT, browserData.parameters.address);
-			lc_Socket.write('{"colorTemp":' + browserData.parameters.colorTemp + '}');
-			// Update gourd status
-			gInfo.colorTemp = browserData.parameters.colorTemp;
-		} else if (browserData.command == "set_dimming") {
-			lc_Socket.connect(lc_PORT, browserData.parameters.address);
-			lc_Socket.write('{"dimming":' + browserData.parameters.dimming + '}');
-			// Update gourd status
-			gInfo.dimming = browserData.parameters.dimming;
-		}
-	});
-});
-
-/*
- *	TCP server for socket communication with gourd sound analysis.
- *	Creates an array GOURDS to store all gourd clients.
- */
-var sm_PORT = 8090;				// Port for gourd sound analysis
-var sm_HOST = 'localhost';
-
-var server = net.createServer();
-server.listen(sm_PORT, sm_HOST);
-
-server.on('connection', function(socket) {
-	console.log('CONNECTED: ' + socket.remoteAddress + ':' + socket.remotePort);
-
-	// Look for an existing record tied to the lamp's IP address
+	//Look for existing record tied to lamp's IP address.
 	var gInfo = GOURDS.filter(function (el) {
 		return (el.address == socket.remoteAddress);
 	})[0];
 
-	// Create an array object if one does not exist
+	//Create an array object if one does not exist.
 	if (!gInfo) {
-		// These are default values -- we'll update them later
+		//Default values -- they are updated later
 		gInfo =
-			{address:socket.remoteAddress,
-			listening:false,
-			hot:false,
-			colorTemp:3000,
-			dimming:100}
-		//Collecting all the clients
+			{address:socket.remoteAddress,listening:false,hot:false,
+			colorTemp:3000,dimming:100}
 		GOURDS.push(gInfo);
-		console.log('new monitor: ' + socket.remoteAddress);	
+		console.log('New Monitor: ' + socket.remoteAddress);
 	}
 
-	// Read data from a connection
+	//Listen for sound monitor data
 	socket.on('data', function(data) {
-		console.log('got data' + data);
-		// Gets the data as an object
-		var smData = JSON.parse(data);
-		// Update gourd status
-		if (smData.hasOwnProperty("listening")) {
-			gInfo.listening = smData.listening};
-		if (smData.hasOwnProperty("hot")) {
-			gInfo.hot = smData.hot};
+		console.log('Got data: ' + data);
+		var mData = JSON.parse(data);
+
+		//Update sound status
+		if (mData.hasOwnProperty("listening")) {
+			gInfo.listening = mData.listening;
+		}
+		if (mData.hasOwnProperty("hot")) {
+			gInfo.hot = mData.hot;
+		}
+
+		//Call HTTP server and give it up-to-date "hot" status.
+		//Probably need to test if foo has been created before executing.
+		foo.write(JSON.stringify(GOURDS));
 	});
 });
 
-server.on('error', function(err) {
-	console.log('Server closed');
+mServer.on('error', function(err) {
+	console.log('mServer closed -- error: ' + err);
 });
 
-server.on('close', function() {
-	console.log('Server closed');
+mServer.on('close', function() {
+	console.log('mServer closed');
 });
+
+/*	cServer = TCP server for socket communication with HTTP server.
+ *	Receives commands from browser and determines what to do.
+ *	lSocket = Sends/receives commands to lighting control program. */
+var cPort = 4040;
+var cHost = 'localhost';
+var lPort = 50007;
+
+var cServer = net.createServer();
+cServer.listen(cPort, cHost);
+
+//Listening for connection by HTTP server
+cServer.on('connection', function(sock) {
+	console.log('cServer CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
+	//For testing purposes. Not necessary in production:
+	sock.write("cServer sending message: Thanks for the connection, browser");
+	//Pass the socket to a function for outside use.
+	foo = new Foo(sock);
+
+	//Routes data from HTTP server to gourd lighting control
+	sock.on('data', function(data) {
+		console.log('Got data: ' + data);
+		//bData = data sent by browser
+		var bData = JSON.parse(data);
+
+		//New socket to communicate with lighting control program.
+		var lSocket = new net.Socket();
+
+		if (bData.command == "get_status") {
+			var status = JSON.stringify(GOURDS);
+			sock.write(status);
+		} else if (bData.command == "open_stream") {
+			var status = JSON.stringify(GOURDS);
+		} else if (bData.command == "set_colorTemp") {
+			lSocket.connect(lPort, bData.parameters.address);
+			lSocket.write('{"colorTemp":' + bData.parameters.colorTemp + '}');
+			var bar = new Bar(lSocket, "colorTemp", bData.parameters.colorTemp);
+		} else if (bData.command == "set_dimming") {
+			lSocket.connect(lPort, bData.parameters.address);
+			lSocket.write('{"dimming":' + bData.parameters.dimming + '}');
+			var bar = new Bar(lSocket, "dimming", bData.parameters.dimming);
+		}
+
+	});
+
+});
+
+// Writes a message to the HTTP server socket outside the ('connection') closure.
+function Foo (socket) {
+	this.write = function (update) {
+		if(socket) {
+			socket.write(update);
+		}
+	}
+}
+
+/*	Reads a message from a lSocket outside the ('connection') closure.
+ *	Sends this message to HTTP server socket. */
+function Bar (socket, cmd, val) {
+	socket.on('data', function(data) {
+		console.log('Got data from lighting control: ' + data);
+		var gInfo = GOURDS.filter(function (el) {
+			return (el.address == socket.remoteAddress);
+		})[0];
+		gInfo.cmd = val;
+		foo.write(JSON.stringify(GOURDS));
+	});
+}

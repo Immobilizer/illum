@@ -15,13 +15,15 @@ class EchoHandler(asyncore.dispatcher_with_send):
 			if "colorTemp" in controlData:
 				colorTemp = controlData['colorTemp']
 				cmdCT = 3
-				callI2C(cmdCT, colorTemp)
-				print 'Color temperature: ', colorTemp
+				if callI2C(cmdCT, colorTemp) == True:
+					self.send(data)
+					print 'Color temperature set to: ', colorTemp
 			if "dimming" in controlData:
 				dimming = controlData['dimming']
 				cmdD = 5
-				callI2C(cmdD, dimming)
-				print 'Dimming level: ', dimming
+				if callI2C(cmdD, dimming) == True:
+					self.send(data)
+					print 'Dimming level set to: ', dimming
 
 class EchoServer(asyncore.dispatcher):
 
@@ -39,10 +41,14 @@ class EchoServer(asyncore.dispatcher):
 			print 'Incoming connection from %s' % repr(addr)
 			handler = EchoHandler(sock)
 
-def callI2C(cmd, value):
+def callI2C(cmd, val):
 	b = SMBus(1) # 1 indicates /dev/i2c-1
 	addr = 0x04
 	b.write_byte_data(addr, cmd, val)
+	if b.read_byte_data(addr, cmd) == val:
+		return True
+	else:
+		return False
 
 server = EchoServer('localhost', 50007)
 asyncore.loop()
