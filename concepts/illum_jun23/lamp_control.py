@@ -18,12 +18,16 @@ class EchoHandler(asyncore.dispatcher_with_send):
 				if callI2C(cmdCT, colorTemp) == True:
 					self.send(data)
 					print 'Color temperature set to: ', colorTemp
+				else:
+					print 'Color temperature not updated'
 			if "dimming" in controlData:
 				dimming = controlData['dimming']
 				cmdD = 5
 				if callI2C(cmdD, dimming) == True:
 					self.send(data)
 					print 'Dimming level set to: ', dimming
+				else:
+					print 'Color temperature not updated'
 
 class EchoServer(asyncore.dispatcher):
 
@@ -44,11 +48,18 @@ class EchoServer(asyncore.dispatcher):
 def callI2C(cmd, val):
 	b = SMBus(1) # 1 indicates /dev/i2c-1
 	addr = 0x04
-	b.write_byte_data(addr, cmd, val)
-	if b.read_byte_data(addr, cmd) == val:
-		return True
-	else:
-		return False
+	while True:
+		try:
+			b.write_byte_data(addr, cmd, val)
+			if b.read_byte_data(addr, cmd) == val:
+				return True
+			else:
+				return False
+			break
+		except IOError:
+			print 'IOError: Could not deliver command to driver.'
+
+	
 
 server = EchoServer('localhost', 50007)
 asyncore.loop()
