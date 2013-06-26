@@ -1,6 +1,6 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
-	var socket = io.connect('document.location.href');
+	var socket = io.connect(document.location.href);
 	socket.on('httpServer', function (data) {
 		console.log(data);
 		document.write(data + "\r\n");
