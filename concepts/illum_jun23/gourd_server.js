@@ -47,8 +47,9 @@ mServer.on('connection', function(socket) {
 		}
 
 		//Call HTTP server and give it up-to-date "hot" status.
-		//Probably need to test if foo has been created before executing.
-		foo.write(JSON.stringify(GOURDS));
+		if (foo != undefined) {
+			foo.write(JSON.stringify(GOURDS));
+		}
 	});
 });
 
