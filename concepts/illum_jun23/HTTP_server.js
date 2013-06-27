@@ -22,6 +22,7 @@ function httpHandler (req, res) {
 		res.writeHead(200);
 		res.end(data);
 	});
+	
 }
 
 http.listen(http_port);
@@ -47,17 +48,14 @@ wsock.sockets.on('connection', function (socket) {
 		tcpClient.on('end', function(data) {
 			console.log('END DATA : ' + data);
 		});
+
 	});
 
-	/*
-	 * I think this should really be called 'tcp'.
-	 * Receives data from browser.
-	 */
+	// Receives data from the browser
 	socket.on('tcp', function(message) {
 		console.log('"tcp" : ' + message);
 		tcpClient.write(message);
 		return;
 	});
 
-	//socket.emit("httpServer", "Initial Data");
 });

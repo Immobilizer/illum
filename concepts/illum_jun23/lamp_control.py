@@ -7,13 +7,14 @@ from smbus import SMBus
 class EchoHandler(asyncore.dispatcher_with_send):
 
 	def handle_read(self):
-		data = self.recv(8192)
+		data = self.recv(1024)
 		if data:
 			controlData = json.loads(data)
 			print 'This is what controlData looks like: ', controlData
 			if "colorTemp" in controlData:
 				colorTemp = controlData['colorTemp']
 				cmdCT = 3
+				self.sendall(data)
 				if callI2C(cmdCT, colorTemp) == True:
 					self.send(data)
 					print 'Color temperature set to: ', colorTemp
