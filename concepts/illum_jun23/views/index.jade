@@ -3,6 +3,13 @@ html
 	head
 		script(src="/socket.io/socket.io.js")
 		script
+			function getOnSetColorTemp (address, temp) {
+				return function (event) {
+					//Code sto send temp here
+					console.log(address, temp);
+				}
+			}
+
 			var socket = io.connect(document.location.href);
 				socket.on('httpServer', function (data) {
 
@@ -11,6 +18,8 @@ html
 					var i = data.length;					
 					var gourd;
 					var li;
+					var span;
+					var btn;
 
 					while(i--) {
 						gourd = data[i];
@@ -20,17 +29,29 @@ html
 							li = document.createElement('li');
 							li.id = gourd.address; 
 							list.appendChild(li);
+
+							span = document.createElement('span');
+							li.appendChild(span);
+
+							btn = document.createElement('a');
+							btn.href = 'javascript:';
+							btn.innerHTML = '5000'
+							btn.addEventListener('click', getOnSetColorTemp(gourd.address, 5000), true);
+							li.appendChild(btn);
 						}
 
-						li.innerHTML = 
+						span = li.getElementsByTagName('span')[0];
+						span.innerHTML = 
 							gourd.address 
 							+ ' - ' + ((gourd.listening) ? 'listening' : 'deaf')
 							+ ' - ' + ((gourd.hot) ? 'hot' : 'cold')
 							+ ' - color: ' + gourd.colorTemp 
 							+ ' - dimming: ' + gourd.dimming;
+
+						console.log(gourd);
+
 					}
 
-					console.log(gourd);
 					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"localhost", "colorTemp":"4000"}}');
 				}); 
 
