@@ -15,15 +15,29 @@ html
 						li.id = data.address; 
 						list.appendChild(li);
 					}
+					var i = data.length;					
+					var gourd;
+					var li;
 
-					li.innerHTML = 
-						data.address 
-						+ ' - ' + ((data.listening) ? 'listening' : 'deaf')
-						+ ' - ' + ((data.hot) ? 'hot' : 'cold')
-						+ ' - color: ' + data.colorTemp 
-						+ ' - dimming: ' + data.dimming;
+					while(i--) {
+						gourd = data[i];
+						li = document.getElementById(gourd.address);
+						
+						if(!li) {
+							li = document.createElement('li');
+							li.id = gourd.address; 
+							list.appendChild(li);
+						}
 
-					console.log(data);
+						li.innerHTML = 
+							gourd.address 
+							+ ' - ' + ((gourd.listening) ? 'listening' : 'deaf')
+							+ ' - ' + ((gourd.hot) ? 'hot' : 'cold')
+							+ ' - color: ' + gourd.colorTemp 
+							+ ' - dimming: ' + gourd.dimming;
+					}
+
+					console.log(gourd);
 					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"localhost", "colorTemp":"4000"}}');
 				});
 	body
