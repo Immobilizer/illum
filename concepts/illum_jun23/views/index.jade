@@ -8,23 +8,29 @@ html
 
 					data = JSON.parse(data);
 					var list = document.getElementById('Gourds');
-					var li = document.getELementById(data.address);
-					
-					if(!li) {
-						document.createElement('li');
-						li.id = data.address; 
-						list.appendChild(li);
+					var i = data.length;					
+					var gourd;
+					var li;
+
+					while(i--) {
+						gourd = data[i];
+						li = document.getElementById(gourd.address);
+						
+						if(!li) {
+							li = document.createElement('li');
+							li.id = gourd.address; 
+							list.appendChild(li);
+						}
+
+						li.innerHTML = 
+							gourd.address 
+							+ ' - ' + ((gourd.listening) ? 'listening' : 'deaf')
+							+ ' - ' + ((gourd.hot) ? 'hot' : 'cold')
+							+ ' - color: ' + gourd.colorTemp 
+							+ ' - dimming: ' + gourd.dimming;
 					}
 
-					li.innerHTML = 
-						data.address 
-						+ ' - ' + ((data.listening) ? 'listening' : 'deaf')
-						+ ' - ' + ((data.hot) ? 'hot' : 'cold')
-						+ ' - color: ' + data.colorTemp 
-						+ ' - dimming: ' + data.dimming;
-
-					console.log(data);
-					document.write(data + "\r\n");
+					console.log(gourd);
 					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"localhost", "colorTemp":"4000"}}');
 				});
 	body
