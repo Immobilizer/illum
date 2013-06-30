@@ -8,13 +8,6 @@ html
 
 					data = JSON.parse(data);
 					var list = document.getElementById('Gourds');
-					var li = document.getElementById(data.address);
-					
-					if(!li) {
-						li = document.createElement('li');
-						li.id = data.address; 
-						list.appendChild(li);
-					}
 					var i = data.length;					
 					var gourd;
 					var li;
