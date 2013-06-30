@@ -5,6 +5,10 @@ html
 		script
 			var socket = io.connect(document.location.href);
 				socket.on('httpServer', function (data) {
+
+					data = JSON.parse(data);
+					var list = document.getElementById('Gourds');
+					
 					console.log(data);
 					document.write(data + "\r\n");
 					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"localhost", "colorTemp":"4000"}}');
