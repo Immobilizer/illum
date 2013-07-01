@@ -3,62 +3,100 @@ html
 	head
 		script(src="/socket.io/socket.io.js")
 		script
+
 			function getOnSetColorTemp (address, temp) {
 				return function (event) {
-					//Code sto send temp here
+					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"' + address + '", "colorTemp":' + temp + '}}');
 					console.log(address + ' ' + temp);
 				}
 			}
 
+			function getOnSetDimming (address, dimming) {
+				return function (event) {
+					socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + address + '", "dimming":' + dimming + '}}');
+					console.log(address + ' ' + dimming);
+				}
+			}
+
 			var socket = io.connect(document.location.href);
-				socket.on('httpServer', function (data) {
+			socket.on('httpServer', function (data) {
 
-					data = JSON.parse(data);
-					var temps = [3000,4000,5000];
-					var list = document.getElementById('Gourds');
-					var i = data.length;					
-					var gourd;
-					var li;
-					var span;
-					var btn;
-					var t;
+				data = JSON.parse(data);
+				var temps = [3000,4000,5000];
+				var dimming = [50, 100];
+				var list = document.getElementById('Gourds');
+				var i = data.length;					
+				var gourd;
+				var li;
+				var span;
+				var btn;
+				var t;
+				var space
 
-					while(i--) {
-						gourd = data[i];
-						li = document.getElementById(gourd.address);
-						
-						if(!li) {
-							li = document.createElement('li');
-							li.id = gourd.address; 
-							list.appendChild(li);
+				while(i--) {
+					gourd = data[i];
+					li = document.getElementById(gourd.address);
+					
+					if(!li) {
+						li = document.createElement('li');
+						li.id = gourd.address; 
+						list.appendChild(li);
 
-							span = document.createElement('span');
-							li.appendChild(span);
-							t = temps.length;
-							while(t--) {
-								btn = document.createElement('a');
-								btn.href = 'javascript:';
-								btn.innerHTML = temps[t];
-								btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t]), true);
-								li.appendChild(btn);
-							}
+						span = document.createElement('span');
+						li.appendChild(span);
+						t = temps.length;
+
+						while(t--) {
+							btn = document.createElement('a');
+							btn.href = 'javascript:';
+							btn.innerHTML = temps[t] + "K";
+							btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t]), true);
+							space = document.createTextNode(" ");
+							li.appendChild(space);
+							li.appendChild(btn);
 						}
 
-						span = li.getElementsByTagName('span')[0];
-						span.innerHTML = 
-							gourd.address 
-							+ ' - ' + ((gourd.listening) ? 'listening' : 'deaf')
-							+ ' - ' + ((gourd.hot) ? 'hot' : 'cold')
-							+ ' - color: ' + gourd.colorTemp 
-							+ ' - dimming: ' + gourd.dimming;
+						d = dimming.length;
 
-						console.log(gourd);
-
+						while(d--) {
+							btn = document.createElement('a');
+							btn.href = 'javascript:';
+							btn.innerHTML = dimming[d] + "%";
+							btn.addEventListener('click', getOnSetDimming(gourd.address, dimming[d]), true);
+							space = document.createTextNode(" ");
+							li.appendChild(space);
+							li.appendChild(btn);
+						}
 					}
 
-					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"localhost", "colorTemp":"4000"}}');
-				}); 
+					span = li.getElementsByTagName('span')[0];
+					span.innerHTML = 
+						gourd.address 
+						+ ' - ' + ((gourd.listening) ? 'listening' : 'deaf')
+						+ ' - ' + ((gourd.hot) ? 'hot' : 'cold')
+						+ ' - color: ' + gourd.colorTemp 
+						+ ' - dimming: ' + gourd.dimming;
 
-				
+					console.log(gourd);
+				}
+			});
+
 	body
 		ul#Gourds
+
+		table
+			thead
+				th address
+				th listening
+				th sound
+				th color
+				th dimming
+			tbody
+				gourd = [{address:'socket.remoteAddress',listening:'false',hot:'false',colorTemp:'3000',dimming:'100'}]
+				each item in gourd
+					tr
+						td= item.address
+						td= item.listening
+						td= item.hot
+						td= item.colorTemp
+						td= item.dimming

@@ -135,12 +135,9 @@ function Bar (socket) {
 			gInfo.dimming = lData.dimming;
 		}
 
-		/*	Disable this block of code for testing.  When UI is inplace,
-		 *	enable this code. Will cause infinite loop of command sending
-		 *	with current build.
 		if (foo != undefined) {
 			foo.write(JSON.stringify(GOURDS));
 		}
-		*/
+		
 	});
 }

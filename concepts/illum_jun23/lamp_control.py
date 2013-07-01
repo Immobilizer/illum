@@ -27,7 +27,7 @@ class EchoHandler(asyncore.dispatcher_with_send):
 					self.send(data)
 					print 'Dimming level set to: ', dimming
 				else:
-					print 'Color temperature not updated'
+					print 'Dimming level not updated'
 
 class EchoServer(asyncore.dispatcher):
 
