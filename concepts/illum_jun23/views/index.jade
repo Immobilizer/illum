@@ -14,12 +14,14 @@ html
 				socket.on('httpServer', function (data) {
 
 					data = JSON.parse(data);
+					var temps = [3000,4000,5000];
 					var list = document.getElementById('Gourds');
 					var i = data.length;					
 					var gourd;
 					var li;
 					var span;
 					var btn;
+					var t;
 
 					while(i--) {
 						gourd = data[i];
@@ -32,12 +34,14 @@ html
 
 							span = document.createElement('span');
 							li.appendChild(span);
-
-							btn = document.createElement('a');
-							btn.href = 'javascript:';
-							btn.innerHTML = '5000'
-							btn.addEventListener('click', getOnSetColorTemp(gourd.address, 5000), true);
-							li.appendChild(btn);
+							t = temps.length;
+							while(t--) {
+								btn = document.createElement('a');
+								btn.href = 'javascript:';
+								btn.innerHTML = temps[t];
+								btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t]), true);
+								li.appendChild(btn);
+							}
 						}
 
 						span = li.getElementsByTagName('span')[0];
