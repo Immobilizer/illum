@@ -19,6 +19,8 @@ html
 			}
 
 			var socket = io.connect(document.location.href);
+			//socket.emit('hello', '{"command":"get_status", "parameters":{"address":"' + cannot put address here + '"}}');
+
 			socket.on('httpServer', function (data) {
 
 				data = JSON.parse(data);
@@ -31,7 +33,9 @@ html
 				var span;
 				var btn;
 				var t;
-				var space
+				var space;
+				var audioEl;
+				var audioSrc;
 
 				while(i--) {
 					gourd = data[i];
@@ -42,16 +46,26 @@ html
 						li.id = gourd.address; 
 						list.appendChild(li);
 
+						audioEl = document.createElement('audio');
+						audioEl.setAttribute("preload", "none");
+						audioEl.autobuffer = false;
+						audioEl.controls = true;
+
+						audioSrc = document.createElement('source');
+						audioSrc.type = 'audio/mpeg';
+						audioSrc.src = 'http://192.168.2.2:8000/raspberrypi.m3u';
+						audioEl.appendChild(audioSrc);
+
 						span = document.createElement('span');
 						li.appendChild(span);
 						t = temps.length;
 
 						while(t--) {
+							space = document.createTextNode(" ");
 							btn = document.createElement('a');
 							btn.href = 'javascript:';
 							btn.innerHTML = temps[t] + "K";
 							btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t]), true);
-							space = document.createTextNode(" ");
 							li.appendChild(space);
 							li.appendChild(btn);
 						}
@@ -59,14 +73,16 @@ html
 						d = dimming.length;
 
 						while(d--) {
+							space = document.createTextNode(" ");
 							btn = document.createElement('a');
 							btn.href = 'javascript:';
 							btn.innerHTML = dimming[d] + "%";
 							btn.addEventListener('click', getOnSetDimming(gourd.address, dimming[d]), true);
-							space = document.createTextNode(" ");
 							li.appendChild(space);
 							li.appendChild(btn);
 						}
+
+						li.appendChild(audioEl);
 					}
 
 					span = li.getElementsByTagName('span')[0];
@@ -83,20 +99,3 @@ html
 
 	body
 		ul#Gourds
-
-		table
-			thead
-				th address
-				th listening
-				th sound
-				th color
-				th dimming
-			tbody
-				gourd = [{address:'socket.remoteAddress',listening:'false',hot:'false',colorTemp:'3000',dimming:'100'}]
-				each item in gourd
-					tr
-						td= item.address
-						td= item.listening
-						td= item.hot
-						td= item.colorTemp
-						td= item.dimming

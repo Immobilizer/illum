@@ -8,7 +8,6 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
-  //, wsock = require('socket.io').listen(http)
   , tcpsock = require('net');
 
 var app = express();
@@ -37,22 +36,19 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-//http.createServer(app).listen(app.get('port'), function(){
-//  console.log('Express server listening on port ' + app.get('port'));
-//});
 
+// Listens for browser connection
 io.sockets.on('connection', function (socket) { 
 
 	var tcpClient = new tcpsock.Socket();
 	tcpClient.setEncoding("ascii");
 	tcpClient.setKeepAlive(true);
 
+	// Connects to gourd server
 	tcpClient.connect(tcp_PORT, tcp_HOST, function() {
 		console.info('CONNECTED TO : ' + tcp_HOST + ':' + tcp_PORT);
 
-		/*
-		 * Recieves data from TCP and sends it to browser.
-		 */
+		// Receives data from gourd server and sends to browser
 		tcpClient.on('data', function(data) {
 			console.log('DATA: ' + data);
 			socket.emit("httpServer", data);
@@ -67,6 +63,13 @@ io.sockets.on('connection', function (socket) {
 	// Receives data from the browser
 	socket.on('tcp', function(message) {
 		console.log('"tcp" : ' + message);
+		tcpClient.write(message);
+		return;
+	});
+
+	// Gets initial data for new browser
+	socket.on('hello', function(message) {
+		console.log('A new broswer connected: ' + message);
 		tcpClient.write(message);
 		return;
 	});
