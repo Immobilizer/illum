@@ -19,7 +19,7 @@ html
 			}
 
 			var socket = io.connect(document.location.href);
-			//socket.emit('hello', '{"command":"get_status", "parameters":{"address":"' + cannot put address here + '"}}');
+			socket.emit('hello', '{"command":"get_status"}');
 
 			socket.on('httpServer', function (data) {
 

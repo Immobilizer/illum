@@ -80,24 +80,23 @@ cServer.on('connection', function(sock) {
 	// Pass the socket to a function for outside use.
 	foo = new Foo(sock);
 
-	// Routes data from HTTP server to gourd lighting control
+	// Command routing
 	sock.on('data', function(data) {
 		console.log('Got data: ' + data);
-		// bData = data sent by browser
-		var bData = JSON.parse(data);
-		// New socket to communicate with lighting control program.
-		var lSocket = new net.Socket();
-		lSocket.connect(lPort, bData.parameters.address);
-		bar = new Bar(lSocket);
 
-		// Route the browser's command
-		if (bData.command == "get_status") {
-			sock.write(JSON.stringify(GOURDS));
-		} else if (bData.command == "open_stream") {
-			var status = JSON.stringify(GOURDS);
+		var bData = JSON.parse(data); // bData is data sent by the browser
+		var lSocket = new net.Socket(); // lighting control python communication
+
+		if(bData.command == "get_status") {
+			foo.write(JSON.stringify(GOURDS));
+			console.log('wrote: ' + JSON.stringify(GOURDS));
 		} else if (bData.command == "set_colorTemp") {
+			lSocket.connect(lPort, bData.parameters.address);
+			bar = new Bar(lSocket);
 			bar.write('{"colorTemp":' + bData.parameters.colorTemp + '}');
 		} else if (bData.command == "set_dimming") {
+			lSocket.connect(lPort, bData.parameters.address);
+			bar = new Bar(lSocket);
 			bar.write('{"dimming":' + bData.parameters.dimming + '}');
 		}
 	});
@@ -108,6 +107,7 @@ function Foo (socket) {
 	this.write = function (update) {
 		if(socket) {
 			socket.write(update);
+			console.log('Foo wrote this update: ' + update)
 		}
 	}
 }

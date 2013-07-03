@@ -6,10 +6,10 @@ import math
 
 SERVER = 'localhost'
 SERVER_PORT = 8090
-HOT = 'false'
+HOT = 'true'
 
 NOISYCOUNT = 0                                         #]
-AVG = 100000.0                                           #]---- Variables for noise detector...
+AVG = 100000.0                                         #]---- Variables for noise detector...
 FAST_AVG = []                                          #]
 VOLUMES = []                                           #]
 FAST_VOLUMES = []                                      #]
