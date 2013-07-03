@@ -1,7 +1,10 @@
 !!! 5
 html
 	head
+		link(rel='stylesheet', type='text/css', href='/stylesheets/simple-slider.css')
 		script(src="/socket.io/socket.io.js")
+		script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js")
+		script(src="/javascripts/simple-slider.js")
 		script
 
 			function getOnSetColorTemp (address, temp) {
@@ -99,3 +102,7 @@ html
 
 	body
 		ul#Gourds
+		<input type="text" data-slider="true" data-slider-range="0,100" />
+		<script>
+		$("[data-slider]").simpleSlider();
+		</script>
