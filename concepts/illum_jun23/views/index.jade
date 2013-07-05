@@ -59,13 +59,21 @@ html
 						audioSrc.src = 'http://192.168.2.2:8000/raspberrypi.m3u';
 						audioEl.appendChild(audioSrc);
 
+						slider = document.createElement('Slider');
+						li.appendChild(slider);
+						$(li.getElementsByTagName('Slider')[0]).simpleSlider({"data-slider-range":"0,100", "data-slider-step":"25"});
+						$(li.getElementsByTagName('Slider')[0]).bind("slider:changed", function (event, data) {
+							socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + data.value + '}}');
+							console.log(address + ' ' + data.value);
+						});
+
 						span = document.createElement('span');
 						li.appendChild(span);
 						t = temps.length;
 
 						while(t--) {
 							space = document.createTextNode(" ");
-							btn = document.createElement('a');
+							btn = document.createElement("BUTTON");
 							btn.href = 'javascript:';
 							btn.innerHTML = temps[t] + "K";
 							btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t]), true);
@@ -102,7 +110,3 @@ html
 
 	body
 		ul#Gourds
-		<input type="text" data-slider="true" data-slider-range="0,100" />
-		<script>
-		$("[data-slider]").simpleSlider();
-		</script>
