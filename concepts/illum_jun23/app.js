@@ -50,19 +50,18 @@ io.sockets.on('connection', function (socket) {
 
 		// Receives data from gourd server and sends to browser
 		tcpClient.on('data', function(data) {
-			console.log('DATA: ' + data);
+			console.log('Got update from gourd server: ' + data);
 			socket.emit("httpServer", data);
 		});
 
 		tcpClient.on('end', function(data) {
 			console.log('END DATA : ' + data);
 		});
-
 	});
 
 	// Receives data from the browser
 	socket.on('tcp', function(message) {
-		console.log('"tcp" : ' + message);
+		console.log('Got update from browser: ' + message);
 		tcpClient.write(message);
 		return;
 	});
@@ -73,5 +72,4 @@ io.sockets.on('connection', function (socket) {
 		tcpClient.write(message);
 		return;
 	});
-
 });

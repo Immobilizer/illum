@@ -7,29 +7,23 @@ html
 		script(src="/javascripts/simple-slider.js")
 		script
 
-			function getOnSetColorTemp (address, temp) {
+			function getOnSetColorTemp (address, temp, t) {
 				return function (event) {
-					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"' + address + '", "colorTemp":' + temp + '}}');
+					socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"' + address + '", "colorTemp":' + t + '}};');
 					console.log(address + ' ' + temp);
 				}
 			}
 
-			function getOnSetDimming (address, dimming) {
-				return function (event) {
-					socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + address + '", "dimming":' + dimming + '}}');
-					console.log(address + ' ' + dimming);
-				}
-			}
-
 			var socket = io.connect(document.location.href);
-			socket.emit('hello', '{"command":"get_status"}');
+
+			socket.emit('hello', '{"command":"get_status"};');
 
 			socket.on('httpServer', function (data) {
 
 				data = JSON.parse(data);
-				var temps = [3000,4000,5000];
-				var dimming = [50, 100];
+				var temps = [0, 3000, 3500, 4000, 4500];
 				var list = document.getElementById('Gourds');
+				var slider = document.getElementById('Slider');
 				var i = data.length;					
 				var gourd;
 				var li;
@@ -59,16 +53,16 @@ html
 						audioSrc.src = 'http://192.168.2.2:8000/raspberrypi.m3u';
 						audioEl.appendChild(audioSrc);
 
-						slider = document.createElement('Slider');
-						li.appendChild(slider);
-						$(li.getElementsByTagName('Slider')[0]).simpleSlider({"data-slider-range":"0,100", "data-slider-step":"25"});
-						$(li.getElementsByTagName('Slider')[0]).bind("slider:changed", function (event, data) {
-							socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + data.value + '}}');
-							console.log(address + ' ' + data.value);
+						$(slider).bind("slider:changed", function (event, data) {
+							socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + data.value + '}};');
+							console.log(gourd.address + ' ' + data.value);
 						});
 
 						span = document.createElement('span');
 						li.appendChild(span);
+						var br = document.createElement("br");
+						li.appendChild(br);
+
 						t = temps.length;
 
 						while(t--) {
@@ -76,32 +70,26 @@ html
 							btn = document.createElement("BUTTON");
 							btn.href = 'javascript:';
 							btn.innerHTML = temps[t] + "K";
-							btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t]), true);
+							btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t], t), true);
 							li.appendChild(space);
 							li.appendChild(btn);
 						}
 
-						d = dimming.length;
+						var br = document.createElement("br");
+						li.appendChild(br);
+						li.appendChild(slider);
 
-						while(d--) {
-							space = document.createTextNode(" ");
-							btn = document.createElement('a');
-							btn.href = 'javascript:';
-							btn.innerHTML = dimming[d] + "%";
-							btn.addEventListener('click', getOnSetDimming(gourd.address, dimming[d]), true);
-							li.appendChild(space);
-							li.appendChild(btn);
-						}
-
+						var br = document.createElement("br");
+						li.appendChild(br);
 						li.appendChild(audioEl);
 					}
 
 					span = li.getElementsByTagName('span')[0];
-					span.innerHTML = 
+					span.innerHTML =
 						gourd.address 
 						+ ' - ' + ((gourd.listening) ? 'listening' : 'deaf')
 						+ ' - ' + ((gourd.hot) ? 'hot' : 'cold')
-						+ ' - color: ' + gourd.colorTemp 
+						+ ' - color: ' + gourd.colorTemp
 						+ ' - dimming: ' + gourd.dimming;
 
 					console.log(gourd);
@@ -110,3 +98,5 @@ html
 
 	body
 		ul#Gourds
+		//input(type='text' data-slider='true' data-slider-range='100,500' data-slider-step='100' data-slider-snap='true')
+		<input id="Slider" type="text" data-slider="true" data-slider-range="0,100" data-slider-step="5" data-slider-snap="false" data-slider-highlight="true">

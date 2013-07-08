@@ -26,17 +26,17 @@ mServer.on('connection', function(socket) {
 
 	// Create an array object if one does not exist.
 	if (!gInfo) {
+		console.log('New sound monitor: ' + socket.remoteAddress);
 		// Default values -- they are updated later
 		gInfo =
 			{address:socket.remoteAddress,listening:false,hot:false,
 			colorTemp:3000,dimming:100}
 		GOURDS.push(gInfo);
-		console.log('New Monitor: ' + socket.remoteAddress);
 	}
 
 	// Listen for sound monitor data
 	socket.on('data', function(data) {
-		console.log('Got data: ' + data);
+		console.log('Got data from sound monitor: ' + data);
 		var mData = JSON.parse(data);
 
 		// Update sound status
@@ -75,39 +75,65 @@ cServer.listen(cPort, cHost);
 // Listening for connection by HTTP server
 cServer.on('connection', function(sock) {
 	console.log('cServer CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
-	// For testing purposes. Not necessary in production:
-	sock.write("cServer sending message: Thanks for the connection, browser");
 	// Pass the socket to a function for outside use.
 	foo = new Foo(sock);
+	var chunk = "";
 
 	// Command routing
 	sock.on('data', function(data) {
-		console.log('Got data: ' + data);
+		console.log('Got data from express server: ' + data);
 
-		var bData = JSON.parse(data); // bData is data sent by the browser
-		var lSocket = new net.Socket(); // lighting control python communication
+		/*try {
+			var bData = JSON.parse(data); // bData is data sent by the browser
+		} catch (err) {
+			console.log("JSON parse error:" + err);
+		}*/
 
-		if(bData.command == "get_status") {
-			foo.write(JSON.stringify(GOURDS));
-			console.log('wrote: ' + JSON.stringify(GOURDS));
-		} else if (bData.command == "set_colorTemp") {
-			lSocket.connect(lPort, bData.parameters.address);
-			bar = new Bar(lSocket);
-			bar.write('{"colorTemp":' + bData.parameters.colorTemp + '}');
-		} else if (bData.command == "set_dimming") {
-			lSocket.connect(lPort, bData.parameters.address);
-			bar = new Bar(lSocket);
-			bar.write('{"dimming":' + bData.parameters.dimming + '}');
+		//var lSocket = new net.Socket(); // lighting control python communication
+
+		// Look for ";" delimeter which indicates end of command
+		chunk += data.toString(); // Add string on the end of 'chunk'
+		d_index = chunk.indexOf(';'); // Find the delimeter
+		console.log('chunk is: ' + chunk + ', d_index is: ' + d_index);
+
+		// Keep going until no delimeter is found
+		while (d_index > -1) {
+			try {
+				var lSocket = new net.Socket(); // lighting control python communication
+				string = chunk.substring(0, d_index); // Create string up until delimeter
+				console.log(string);
+				bData = JSON.parse(string); // Parse the current string
+				
+				if(bData.command == "get_status") {
+					foo.write(JSON.stringify(GOURDS));
+				} else if (bData.command == "set_colorTemp") {
+					lSocket.connect(lPort, bData.parameters.address);
+					bar = new Bar(lSocket);
+					bar.write('{"colorTemp":' + bData.parameters.colorTemp + '}');
+				} else if (bData.command == "set_dimming") {
+					lSocket.connect(lPort, bData.parameters.address);
+					bar = new Bar(lSocket);
+					bar.write('{"dimming":' + bData.parameters.dimming + '}');
+				}
+			} finally {
+				chunk = chunk.substring(d_index + 1); // Cuts off the processed chunk
+				d_index = chunk.indexOf(';'); // Find the new delimiter
+				console.log('old chunk cut off: ' + chunk + ', d_index: ' + d_index);
+			}
 		}
 	});
 });
+
+// Routes commands to be sent to lighting control
+function routeCmd (foo, lSocket, bData) {
+	console.log('routeCmd fired');
+}
 
 // Writes HTTP message outside the cServer ('connection') closure.
 function Foo (socket) {
 	this.write = function (update) {
 		if(socket) {
 			socket.write(update);
-			console.log('Foo wrote this update: ' + update)
 		}
 	}
 }

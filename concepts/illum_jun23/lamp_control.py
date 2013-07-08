@@ -7,24 +7,25 @@ from smbus import SMBus
 class EchoHandler(asyncore.dispatcher_with_send):
 
 	def handle_read(self):
-		data = self.recv(1024)
+		data = self.recv(512)
+		print 'received data: ', data
 		if data:
 			controlData = json.loads(data)
-			print 'This is what controlData looks like: ', controlData
 			if "colorTemp" in controlData:
 				colorTemp = controlData['colorTemp']
 				cmdCT = 3
 				self.sendall(data)
 				if callI2C(cmdCT, colorTemp) == True:
-					self.send(data)
+					self.sendall(data)
 					print 'Color temperature set to: ', colorTemp
 				else:
 					print 'Color temperature not updated'
 			if "dimming" in controlData:
 				dimming = controlData['dimming']
 				cmdD = 5
+				self.sendall(data)
 				if callI2C(cmdD, dimming) == True:
-					self.send(data)
+					self.sendall(data)
 					print 'Dimming level set to: ', dimming
 				else:
 					print 'Dimming level not updated'
@@ -36,7 +37,7 @@ class EchoServer(asyncore.dispatcher):
 		self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.set_reuse_addr()
 		self.bind((host, port))
-		self.listen(500)
+		self.listen(5)
 
 	def handle_accept(self):
 		pair = self.accept()
