@@ -1,5 +1,6 @@
 # Lighting control listener
 import socket
+import time
 import json
 import asyncore
 from smbus import SMBus
@@ -13,8 +14,8 @@ class EchoHandler(asyncore.dispatcher_with_send):
 			controlData = json.loads(data)
 			if "colorTemp" in controlData:
 				colorTemp = controlData['colorTemp']
-				cmdCT = 3
-				self.sendall(data)
+				cmdCT = 2
+				#self.sendall(data)
 				if callI2C(cmdCT, colorTemp) == True:
 					self.sendall(data)
 					print 'Color temperature set to: ', colorTemp
@@ -22,8 +23,8 @@ class EchoHandler(asyncore.dispatcher_with_send):
 					print 'Color temperature not updated'
 			if "dimming" in controlData:
 				dimming = controlData['dimming']
-				cmdD = 5
-				self.sendall(data)
+				cmdD = 10
+				#self.sendall(data)
 				if callI2C(cmdD, dimming) == True:
 					self.sendall(data)
 					print 'Dimming level set to: ', dimming
@@ -51,6 +52,7 @@ def callI2C(cmd, val):
 	addr = 0x04
 	try:
 		b.write_byte_data(addr, cmd, val)
+		time.sleep(.01)
 		try:
 			if b.read_byte_data(addr, cmd) == val:
 				return True
