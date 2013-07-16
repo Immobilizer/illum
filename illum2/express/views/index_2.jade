@@ -26,6 +26,8 @@ html
 				var i = data.length;					
 				var gourd;
 				var li;
+				var sliderEle;
+				var eleId;
 				var span;
 				var btn;
 				var t;
@@ -52,21 +54,6 @@ html
 						audioSrc.src = 'http://192.168.2.2:8000/raspberrypi.m3u';
 						audioEl.appendChild(audioSrc);
 
-						$(".noUiSlider").noUiSlider({
-							range: [0, 10]
-							,start: [0]
-							,step: 1
-							,handles: 1
-							,orientation: "horizontal"
-							,slide: function(){
-								var values = $(this).val();
-								//socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + values + '}};');
-								socket.emit('tcp', '{"command":"set_currents", "parameters":{"ccx":0.4258, "ccy":0.3846, "lumens":4000, "reveal":' + values + ".0" + '}};');
-								//console.log(gourd.address + ' ' + values);
-								console.log('emitted TCP');
-							}
-						});
-
 						span = document.createElement('span');
 						li.appendChild(span);
 						var br = document.createElement("br");
@@ -83,6 +70,46 @@ html
 							li.appendChild(space);
 							li.appendChild(btn);
 						}
+
+						//dimming
+						eleId = gourd.address + '_dimming';
+						sliderEle = document.createElement('div');
+						sliderEle.id = eleId;
+						li.appendChild(sliderEle);
+						$("#" + eleId).noUiSlider({
+							range: [0, 10]
+							,start: [0]
+							,step: 1
+							,handles: 1
+							,orientation: "horizontal"
+							,slide: function(){
+								var values = $(this).val();
+								socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + values + '}};');
+								//socket.emit('tcp', '{"command":"set_currents", "parameters":{"ccx":0.4258, "ccy":0.3846, "lumens":4000, "reveal":' + values + ".0" + '}};');
+								//console.log(gourd.address + ' ' + values);
+								console.log('emitted TCP');
+							}
+						});
+
+						//currentz
+						eleId = gourd.address + '_currents';
+						sliderEle = document.createElement('div');
+						sliderEle.id = eleId;
+						li.appendChild(sliderEle);
+						$("#" + eleId).noUiSlider({
+							range: [0, 10]
+							,start: [0]
+							,step: 1
+							,handles: 1
+							,orientation: "horizontal"
+							,slide: function(){
+								var values = $(this).val();
+								//socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + values + '}};');
+								socket.emit('tcp', '{"command":"set_currents", "parameters":{"ccx":0.4258, "ccy":0.3846, "lumens":4000, "reveal":' + values + ".0" + '}};');
+								//console.log(gourd.address + ' ' + values);
+								console.log('emitted TCP');
+							}
+						});
 
 						var br = document.createElement("br");
 						li.appendChild(br);
@@ -105,5 +132,4 @@ html
 		ul#Gourds
 		//input(type='text' data-slider='true' data-slider-range='100,500' data-slider-step='100' data-slider-snap='true')
 		//<input id="Slider" type="text" data-slider="true" data-slider-range="0,100" data-slider-step="5" data-slider-snap="false" data-slider-highlight="true">
-		<div class="noUiSlider"></div>
 
