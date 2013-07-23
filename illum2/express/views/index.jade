@@ -22,16 +22,20 @@ html
 
 				data = JSON.parse(data);
 				var temps = [0, 3000, 3500, 4000, 4500];
+				var colorParams = {"ccx":0.4258, "ccy":.3846, "lumens":5000, "reveal":5};
 				var list = document.getElementById('Gourds');
 				var i = data.length;					
 				var gourd;
 				var li;
+				var sliderEle;
+				var eleId;
 				var span;
 				var btn;
 				var t;
 				var space;
 				var audioEl;
 				var audioSrc;
+				var examples = [];
 
 				while(i--) {
 					gourd = data[i];
@@ -52,19 +56,6 @@ html
 						audioSrc.src = 'http://192.168.2.2:8000/raspberrypi.m3u';
 						audioEl.appendChild(audioSrc);
 
-						$(".noUiSlider").noUiSlider({
-							range: [0, 100]
-							,start: [100]
-							,step: 1
-							,handles: 1
-							,orientation: "horizontal"
-							,slide: function(){
-								var values = $(this).val();
-								socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + values + '}};');
-								console.log(gourd.address + ' ' + values);
-							}
-						});
-
 						span = document.createElement('span');
 						li.appendChild(span);
 						var br = document.createElement("br");
@@ -82,9 +73,60 @@ html
 							li.appendChild(btn);
 						}
 
+						//lumens
+						eleId = gourd.address + '_lumens';
+						sliderEle = document.createElement('div');
+						sliderEle.className = 'noUiSlider';
+						var br = document.createElement("br");
+						li.appendChild(br);
+						var br = document.createElement("br");
+						li.appendChild(br);
+						li.appendChild(sliderEle);
+						var br = document.createElement("br");
+						li.appendChild(br);
+
+						examples.push({
+							range: [0,10000]
+							,start: [5000]
+							,handles: 1
+							,step:20
+							,slide:function(){
+								var values=$(this).val();
+								colorParams.lumens = values
+								socket.emit('tcp', '{"command":"set_params", "parameters":{"ccx":0.4258, "ccy":0.3846, "lumens":' + colorParams.lumens + ', "reveal":' + colorParams.reveal + '}};');
+								console.log('emitted TCP', colorParams);
+							}
+						});
+
+						//reveal
+						eleId = gourd.address + '_reveal';
+						sliderEle = document.createElement('div');
+						sliderEle.className = 'noUiSlider';
+						var br = document.createElement("br");
+						li.appendChild(br);
+						li.appendChild(sliderEle);
+						var br = document.createElement("br");
+						li.appendChild(br);
+						examples.push({
+							range: [0,10]
+							,start: [3]
+							,handles: 1
+							,step:1
+							,slide:function(){
+								var values=$(this).val();
+								colorParams.reveal = values
+								socket.emit('tcp', '{"command":"set_params", "parameters":{"ccx":0.4258, "ccy":0.3846, "lumens":' + colorParams.lumens + ', "reveal":' + colorParams.reveal + '}};');
+								console.log('emitted TCP', colorParams);
+							}
+						});
+
 						var br = document.createElement("br");
 						li.appendChild(br);
 						li.appendChild(audioEl);
+
+						$('.noUiSlider').each(function(i){
+							$(this).noUiSlider(examples[i]);
+						});
 					}
 
 					span = li.getElementsByTagName('span')[0];
@@ -101,6 +143,3 @@ html
 
 	body
 		ul#Gourds
-		//input(type='text' data-slider='true' data-slider-range='100,500' data-slider-step='100' data-slider-snap='true')
-		//<input id="Slider" type="text" data-slider="true" data-slider-range="0,100" data-slider-step="5" data-slider-snap="false" data-slider-highlight="true">
-		<div class="noUiSlider"></div>

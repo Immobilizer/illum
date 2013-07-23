@@ -90,6 +90,7 @@ cServer.on('connection', function(sock) {
 	var lSocket = new net.Socket(); // lighting control python communication
 	lSocket.connect(lPort, "127.0.0.1"); // Must figure out a way to store lamp address to route commands to correct lamp
 	lSocket.setKeepAlive(true);
+	bar = new Bar(lSocket);
 	// Pass the socket to a function for outside use.
 	foo = new Foo(sock);
 	var chunk = "";
@@ -111,8 +112,8 @@ cServer.on('connection', function(sock) {
 				
 				if(bData.command == "get_status") {
 					foo.write(JSON.stringify(GOURDS));
-				} else if (bData.command == "set_currents") {
-					bar = new Bar(lSocket);
+				} else if (bData.command == "set_params") {
+					//bar = new Bar(lSocket);
 					bar.write(
 						'{"parameters":' +
 							'{"ccx":' + bData.parameters.ccx +
