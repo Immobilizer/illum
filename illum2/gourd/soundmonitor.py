@@ -25,7 +25,7 @@ def readAudioData(in_data, frame_count, time_info, status):
 
 	# adjust these values to fine tune sound detection
 	blockThreshold = 4 # if we get this many loud blocks in a row, sound is important
-	floorFactor = math.fabs((AVG - 4036.)/(-1454)) # volumes proportional to this number and under are considered the noise floor
+	floorFactor = math.fabs((AVG - 4500.)/(-1454)) # volumes proportional to this number and under are considered the noise floor
 	if 1.2 < floorFactor < 3:
 		floorFactor
 	elif 1.2 > floorFactor:

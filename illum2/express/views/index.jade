@@ -3,7 +3,8 @@ html
 	head
 		link(rel='stylesheet', type='text/css', href='/stylesheets/nouislider.fox.css')
 		script(src="/socket.io/socket.io.js")
-		script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js")
+		//script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js")
+		script(src="/javascripts/jquery-1.10.2.min.js")
 		script(src="/javascripts/jquery.nouislider.js")
 		script
 
@@ -21,7 +22,7 @@ html
 			socket.on('httpServer', function (data) {
 
 				data = JSON.parse(data);
-				var temps = [0, 3000, 3500, 4000, 4500];
+				var temps = ["white", "blue", "green", "red", "sun"];
 				var colorParams = {"ccx":0.4258, "ccy":.3846, "lumens":5000, "reveal":5};
 				var list = document.getElementById('Gourds');
 				var i = data.length;
@@ -46,15 +47,15 @@ html
 						li.id = gourd.address; 
 						list.appendChild(li);
 
-						audioEl = document.createElement('audio');
-						audioEl.setAttribute("preload", "none");
-						audioEl.autobuffer = false;
-						audioEl.controls = true;
+						//audioEl = document.createElement('audio');
+						//audioEl.setAttribute("preload", "none");
+						//audioEl.autobuffer = false;
+						//audioEl.controls = true;
 
-						audioSrc = document.createElement('source');
-						audioSrc.type = 'audio/mpeg';
-						audioSrc.src = 'http://192.168.2.2:8000/raspberrypi.m3u';
-						audioEl.appendChild(audioSrc);
+						//audioSrc = document.createElement('source');
+						//audioSrc.type = 'audio/mpeg';
+						//audioSrc.src = 'http://192.168.1.3:8000/raspberrypi.m3u';
+						//audioEl.appendChild(audioSrc);
 
 						span = document.createElement('span');
 						li.appendChild(span);
@@ -67,7 +68,7 @@ html
 							space = document.createTextNode(" ");
 							btn = document.createElement("BUTTON");
 							btn.href = 'javascript:';
-							btn.innerHTML = temps[t] + "K";
+							btn.innerHTML = temps[t];
 							btn.addEventListener('click', getOnSetColorTemp(gourd.address, temps[t], t), true);
 							li.appendChild(space);
 							li.appendChild(btn);
@@ -123,7 +124,7 @@ html
 
 						var br = document.createElement("br");
 						li.appendChild(br);
-						li.appendChild(audioEl);
+						//li.appendChild(audioEl);
 
 						$('.noUiSlider').each(function(i){
 							$(this).noUiSlider(examples[i]);
