@@ -24,7 +24,7 @@ html
 				var temps = [0, 3000, 3500, 4000, 4500];
 				var colorParams = {"ccx":0.4258, "ccy":.3846, "lumens":5000, "reveal":5};
 				var list = document.getElementById('Gourds');
-				var i = data.length;					
+				var i = data.length;
 				var gourd;
 				var li;
 				var sliderEle;
@@ -73,7 +73,7 @@ html
 							li.appendChild(btn);
 						}
 
-						//lumens
+						//dimming
 						eleId = gourd.address + '_lumens';
 						sliderEle = document.createElement('div');
 						sliderEle.className = 'noUiSlider';
@@ -86,19 +86,19 @@ html
 						li.appendChild(br);
 
 						examples.push({
-							range: [0,10000]
-							,start: [5000]
+							range: [0,100]
+							,start: [100]
 							,handles: 1
-							,step:20
+							,step:1
 							,slide:function(){
 								var values=$(this).val();
 								colorParams.lumens = values
-								socket.emit('tcp', '{"command":"set_params", "parameters":{"ccx":0.4258, "ccy":0.3846, "lumens":' + colorParams.lumens + ', "reveal":' + colorParams.reveal + '}};');
-								console.log('emitted TCP', colorParams);
+								socket.emit('tcp', '{"command":"set_dimming", "parameters":{"address":"' + gourd.address + '", "dimming":' + values + '}};');
+								console.log('emitted TCP, dimming', values);
 							}
 						});
 
-						//reveal
+						//color
 						eleId = gourd.address + '_reveal';
 						sliderEle = document.createElement('div');
 						sliderEle.className = 'noUiSlider';
@@ -107,16 +107,17 @@ html
 						li.appendChild(sliderEle);
 						var br = document.createElement("br");
 						li.appendChild(br);
+
 						examples.push({
 							range: [0,10]
-							,start: [3]
+							,start: [0]
 							,handles: 1
 							,step:1
 							,slide:function(){
 								var values=$(this).val();
 								colorParams.reveal = values
-								socket.emit('tcp', '{"command":"set_params", "parameters":{"ccx":0.4258, "ccy":0.3846, "lumens":' + colorParams.lumens + ', "reveal":' + colorParams.reveal + '}};');
-								console.log('emitted TCP', colorParams);
+								socket.emit('tcp', '{"command":"set_colorTemp", "parameters":{"address":"' + gourd.address + '", "colorTemp":' + values + '}};');
+								console.log('emitted TCP, color', values);
 							}
 						});
 

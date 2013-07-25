@@ -16,33 +16,33 @@ class EchoHandler(asyncore.dispatcher_with_send):
 			print 'received data: ', data
 
 			while True:
-				print 'while True fired'
+				#print 'while True fired'
 				if length is None:
-					print 'if length is None fired'
+					#print 'if length is None fired'
 					if ';' not in buffer1:
 						break
 					length_str = buffer1.partition(';')
-					print 'buffer1.partition fired, length_str: ', length_str
+					#print 'buffer1.partition fired, length_str: ', length_str
 					length = len(length_str[0])
-					print 'length: ', length
+					#print 'length: ', length
 				if length == 0:
 					break
 				if len(buffer1) < length:
 					break
 				message = buffer1[:length]
-				print 'set message fired: ', message
+				#print 'set message fired: ', message
 				buffer1 = buffer1[length:]
-				print 'set buffer1 fired: ', buffer1
+				#print 'set buffer1 fired: ', buffer1
 				length = None
 				
 				# Process message here
 				if message:
-					print 'if message fired'
+					#print 'if message fired'
 					controlData = json.loads(message)
-					print 'json.loads fired'
+					#print 'json.loads fired'
 
 					if "colorTemp" in controlData:
-						print 'if "colorTemp" fired'
+						#print 'if "colorTemp" fired'
 						colorTemp = controlData['colorTemp']
 						cmdCT = 2
 
@@ -50,7 +50,7 @@ class EchoHandler(asyncore.dispatcher_with_send):
 							b.write_byte_data(addr, cmdCT, colorTemp)
 							try:
 								value = b.read_byte_data(addr, cmdCT)
-								print 'Read byte data: ', value
+								#print 'Read byte data: ', value
 								if value == colorTemp/2:
 									#self.sendall(message)
 									print 'Color temperature set to: ', colorTemp
@@ -59,11 +59,11 @@ class EchoHandler(asyncore.dispatcher_with_send):
 							except IOError:
 								print 'IOError: Could not read driver state'
 						except IOError:
-							print 'IOError: Could not deliver command to driver.'
+							print 'IOError: Could not deliver color command to driver.'
 
 					if "dimming" in controlData:
 						dimming = controlData['dimming']
-						cmdD = 10
+						cmdD = 11
 
 						try:
 							b.write_byte_data(addr, cmdD, dimming)
@@ -78,7 +78,7 @@ class EchoHandler(asyncore.dispatcher_with_send):
 							except IOError:
 								print 'IOError: Could not read driver state'
 						except IOError:
-							print 'IOError: Could not deliver command to driver.'
+							print 'IOError: Could not deliver dimming command to driver.'
 
 class EchoServer(asyncore.dispatcher):
 
